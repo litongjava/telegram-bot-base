@@ -88,9 +88,9 @@ public class BotChannelService {
       }
     }
   }
-  
+
   public List<Row> getChannels(String carId) {
-    String sql = "SELECT channel_id, channel_name, url, car_id, tg_id, message_id FROM bot_channel WHERE delete=0 and car_id = ?";
+    String sql = "SELECT channel_id, channel_name, url, car_id, tg_id, message_id FROM bot_channel WHERE deleted=0 and car_id = ?";
     List<Row> channels = Db.find(sql, carId);
     return channels;
   }
