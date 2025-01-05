@@ -3,6 +3,7 @@ package com.litongjava.telegram.bot.service;
 import java.util.List;
 
 import com.litongjava.db.activerecord.Db;
+import com.litongjava.db.activerecord.Row;
 import com.litongjava.jfinal.aop.Aop;
 import com.litongjava.telegram.bot.model.BotChannel;
 import com.litongjava.telegram.bot.model.Convoy;
@@ -86,5 +87,11 @@ public class BotChannelService {
         convoy.update();
       }
     }
+  }
+  
+  public List<Row> getChannels(String carId) {
+    String sql = "SELECT channel_id, channel_name, url, car_id, tg_id, message_id FROM bot_channel WHERE delete=0 and car_id = ?";
+    List<Row> channels = Db.find(sql, carId);
+    return channels;
   }
 }

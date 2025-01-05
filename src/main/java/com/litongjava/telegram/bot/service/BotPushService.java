@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -17,6 +16,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import com.litongjava.db.activerecord.Db;
 import com.litongjava.db.activerecord.Row;
 import com.litongjava.db.utils.MarkdownTableUtils;
+import com.litongjava.jfinal.aop.Aop;
+import com.litongjava.telegram.bot.model.BotChannel;
 import com.litongjava.telegram.can.TelegramClientCan;
 import com.litongjava.telegram.utils.InlineKeyboardButtonUtils;
 import com.litongjava.telegram.utils.SendMessageUtils;
@@ -80,7 +81,7 @@ public class BotPushService {
       ret.append("<a href='").append(botUrl).append("'>🚀来自" + botTitle + "【").append(carName).append("】组🚀</a>\n\n");
 
       // 获取频道信息
-      List<Row> channels = Db.find("SELECT channel_id, channel_name, url, car_id, tg_id, message_id FROM bot_channel WHERE car_id = ?", carId);
+      List<Row> channels = Aop.get(BotChannelService.class).getChannels(carId);
       if (channels.isEmpty()) {
         log.info("车队 {} 没有相关频道。", carName);
         continue;
@@ -150,7 +151,6 @@ public class BotPushService {
           Telegram.use().sendMessage(chatId, text);
 
         } catch (Exception e) {
-
           log.error("{}-{} 发送失败：{}", channelId, channelName, e.getCause());
           Db.updateBySql("UPDATE bot_channel SET message_id = 0,car_id=0 WHERE channel_id = ?", channelId);
 
@@ -167,7 +167,6 @@ public class BotPushService {
             model.setContent("机器人已成功退出频道/群组 " + channelId);
             text = NotificationTemplate.format(model);
             Telegram.use().sendMessage(chatId, text);
-
           } catch (Exception leaveException) {
             log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
             model.setWarningName("退出群组/频道");
@@ -175,6 +174,10 @@ public class BotPushService {
             text = NotificationTemplate.format(model);
             Telegram.use().sendMessage(chatId, text);
           }
+          BotChannel botChannel = new BotChannel();
+          botChannel.setChannelId(channelId.toString());
+          botChannel.setDeleted(1);
+          botChannel.update();
 
         }
         try {
@@ -186,8 +189,6 @@ public class BotPushService {
     }
     log.info("==================进行互推完成==================");
   }
-
-  
 
   private ReplyKeyboard buildButtons(String url, String button1) {
     // 构建带有 URL 的按钮
