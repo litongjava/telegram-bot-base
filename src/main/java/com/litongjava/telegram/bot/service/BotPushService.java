@@ -151,7 +151,7 @@ public class BotPushService {
           Telegram.use().sendMessage(chatId, text);
 
         } catch (Exception e) {
-          log.error("{}-{} 发送失败：{}", channelId, channelName, e.getCause());
+          log.error("{}-{} 发送失败：", channelId, channelName, e);
           Db.updateBySql("UPDATE bot_channel SET message_id = 0,car_id=0 WHERE channel_id = ?", channelId);
 
           String table = MarkdownTableUtils.toItems(channel);
