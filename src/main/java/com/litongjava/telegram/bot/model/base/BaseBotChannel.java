@@ -165,5 +165,14 @@ public abstract class BaseBotChannel<M extends BaseBotChannel<M>> extends Model<
 		return getInt("deleted");
 	}
 	
+	public M setIsAdmin(java.lang.Boolean isAdmin) {
+		set("is_admin", isAdmin);
+		return (M)this;
+	}
+	
+	public java.lang.Boolean getIsAdmin() {
+		return getBoolean("is_admin");
+	}
+	
 }
 

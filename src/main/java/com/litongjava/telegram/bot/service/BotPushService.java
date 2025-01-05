@@ -162,8 +162,7 @@ public class BotPushService {
 
           // 2. 尝试让机器人退出频道或群组
           try {
-            LeaveChat leaveChat = LeaveChat.builder().chatId(channelId.toString()).build();
-            TelegramClientCan.execute(leaveChat);
+            TelegramClientCan.leaveChat(chatId);
             log.info("机器人已成功退出频道/群组 {}", channelId);
             model.setContent("机器人已成功退出频道/群组 " + channelId);
             text = NotificationTemplate.format(model);

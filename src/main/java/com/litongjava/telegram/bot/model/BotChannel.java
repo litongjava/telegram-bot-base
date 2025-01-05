@@ -27,6 +27,7 @@ public class BotChannel extends BaseBotChannel<BotChannel> {
   // private java.util.Date updateTime
   // private java.lang.Long accessHash
   // private java.lang.Integer deleted
+  // private java.lang.Integer isAdmin
 
   @Override
   protected String _getPrimaryKey() {
