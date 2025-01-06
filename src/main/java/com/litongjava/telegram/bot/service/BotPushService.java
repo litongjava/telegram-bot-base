@@ -34,8 +34,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class BotPushService {
   private final Random random = new Random();
+  private boolean is_running = false;
 
   public void push() {
+    if (!is_running) {
+      is_running = true;
+      execute();
+      is_running = false;
+    }
+
+  }
+
+  private void execute() {
     log.info("==================定时任务开始==================");
     String chatId = EnvUtils.getStr("telegram.notification.chat.id");
     NotifactionWarmModel model = new NotifactionWarmModel();
@@ -145,11 +155,6 @@ public class BotPushService {
           Db.updateBySql("UPDATE bot_channel SET message_id = ? WHERE channel_id = ?", newMessageId, channelId);
           log.info("{}-{} 发送成功，消息ID：{}", channelId, channelName, newMessageId);
 
-          model.setContent("推送消息成功:" + "channelId:" + channelId + ",channelName:" + channelName + ",newMessageId:" + newMessageId);
-          model.setWarningName("推送消息成功");
-          String text = NotificationTemplate.format(model);
-          Telegram.use().sendMessage(chatId, text);
-
         } catch (Exception e) {
           log.error("{}-{} 发送失败：", channelId, channelName, e);
           Db.updateBySql("UPDATE bot_channel SET message_id = 0,car_id=0 WHERE channel_id = ?", channelId);
@@ -163,10 +168,6 @@ public class BotPushService {
           // 2. 尝试让机器人退出频道或群组
           try {
             TelegramClientCan.leaveChat(channelId.toString());
-            log.info("机器人已成功退出频道/群组 {}", channelId);
-            model.setContent("机器人已成功退出频道/群组 " + channelId);
-            text = NotificationTemplate.format(model);
-            Telegram.use().sendMessage(chatId, text);
           } catch (Exception leaveException) {
             log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
             model.setWarningName("退出群组/频道");
