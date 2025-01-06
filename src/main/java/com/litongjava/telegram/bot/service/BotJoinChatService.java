@@ -16,9 +16,15 @@ import com.litongjava.telegram.utils.SendMessageUtils;
 import com.litongjava.telegram.utils.TelegramBotUtils;
 import com.litongjava.telegram.utils.TelegramChatInfoFetcher;
 import com.litongjava.telegram.vo.TelegramChatInfo;
+import com.litongjava.tio.utils.json.JacksonUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BotJoinChatService {
   public void index(Update update) {
+    String json = JacksonUtils.toJson(update);
+    log.info("json:{}", json);
     ChatMemberUpdated myChatMember = update.getMyChatMember();
     ChatMember oldChatMember = myChatMember.getOldChatMember();
     ChatMember newChatMember = myChatMember.getNewChatMember();
@@ -43,17 +49,17 @@ public class BotJoinChatService {
     String chatUrl = (username != null && !username.isEmpty()) ? "https://t.me/" + username : "";
 
     // 判断是机器人自己被添加为管理员还是被删除
-    String oldStatus = oldChatMember.getStatus();
+    // String oldStatus = oldChatMember.getStatus();
     String newStatus = newChatMember.getStatus();
 
-    // 如果 newStatus = administrator 且 oldStatus = left，说明机器人被加入为管理员
-    if ("left".equals(oldStatus)) {
-      handleJoinEvent(channelIdLong, channelTitle, chatUrl, fromUser.getId(), type);
+    // 如果 newStatus = administrator
+    if ("left".equals(newStatus) || "kicked".equals(newStatus)) {
+      handleLeftEvent(channelIdLong, channelTitle, chatUrl);
     }
 
-    // 如果 newStatus = left 且 oldStatus = administrator，说明机器人被移出
-    if ("left".equals(newStatus)) {
-      handleLeftEvent(channelIdLong, channelTitle, chatUrl);
+    // 如果 newStatus = administrator
+    if ("administrator".equals(newStatus) || "member".equals(newStatus)) {
+      handleJoinEvent(channelIdLong, channelTitle, chatUrl, fromUser.getId(), type);
     }
 
   }
