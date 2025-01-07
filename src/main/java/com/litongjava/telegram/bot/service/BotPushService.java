@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -136,56 +137,56 @@ public class BotPushService {
 
         // 删除旧消息
         if (messageIdStr != null && !messageIdStr.isEmpty()) {
-          try {
-            int messageId = Integer.valueOf(messageIdStr);
-            TelegramClientCan.deleteMessage(channelId, messageId);
-            log.info("已删除频道 {} 的旧消息 {}", channelId, messageId);
-          } catch (Exception e) {
-            log.error("{}-{} 删除失败：{}", channelId, channel.getStr("channel_name"), e.getMessage());
-            Db.updateBySql("UPDATE bot_channel SET message_id = 0 WHERE channel_id = ?", channelId);
-          }
+          int messageId = Integer.valueOf(messageIdStr);
+          CompletableFuture<Boolean> future = TelegramClientCan.deleteMessageAsync(channelId, messageId);
+          future.whenComplete((deleted, exception) -> {
+            if (exception != null) {
+              log.error("{}-{} 删除失败：{}", channelId, channel.getStr("channel_name"), exception.getMessage());
+              Db.updateBySql("UPDATE bot_channel SET message_id = 0 WHERE channel_id = ?", channelId);
+            } else {
+              if (deleted) {
+                log.info("已删除频道 {} 的旧消息 {}", channelId, messageId);
+              } else {
+                log.warn("频道 {} 的消息 {} 未被删除，返回结果为 false", channelId, messageId);
+              }
+            }
+          });
         }
 
         SendMessage html = SendMessageUtils.html(channelId.toString(), ret.toString(), buttons);
         log.info("push to {},{}", channelId, channelName);
-        try {
-          // 使用主 bot 发送消息
-          Message message = TelegramClientCan.execute(html);
-          Integer newMessageId = message.getMessageId();
-          Db.updateBySql("UPDATE bot_channel SET message_id = ? WHERE channel_id = ?", newMessageId, channelId);
-          log.info("{}-{} 发送成功，消息ID：{}", channelId, channelName, newMessageId);
-
-        } catch (Exception e) {
-          log.error("{}-{} 发送失败：", channelId, channelName, e);
-          Db.updateBySql("UPDATE bot_channel SET message_id = 0,car_id=0 WHERE channel_id = ?", channelId);
-
-          String table = MarkdownTableUtils.toItems(channel);
-          model.setContent("推送消息失败:" + e.getMessage() + "\n" + table);
-          model.setWarningName("推送消息失败");
-          String text = NotificationTemplate.format(model);
-          Telegram.use().sendMessage(chatId, text);
-
-          // 2. 尝试让机器人退出频道或群组
-          try {
-            TelegramClientCan.leaveChat(channelId.toString());
-          } catch (Exception leaveException) {
-            log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
-            model.setWarningName("退出群组/频道");
-            model.setContent("机器人退出频道/群组 失败" + channelId + leaveException.getMessage());
-            text = NotificationTemplate.format(model);
+        CompletableFuture<Message> future = TelegramClientCan.executeAsync(html);
+        future.whenComplete((message, exception) -> {
+          if (exception != null) {
+            log.error("{}-{} 发送失败：", channelId, channelName, exception);
+            Db.updateBySql("UPDATE bot_channel SET message_id = 0,car_id=0 WHERE channel_id = ?", channelId);
+            String table = MarkdownTableUtils.toItems(channel);
+            model.setContent("推送消息失败:" + exception.getMessage() + "\n" + table);
+            model.setWarningName("推送消息失败");
+            String text = NotificationTemplate.format(model);
             Telegram.use().sendMessage(chatId, text);
-          }
-          BotChannel botChannel = new BotChannel();
-          botChannel.setChannelId(channelId.toString());
-          botChannel.setDeleted(1);
-          botChannel.update();
 
-        }
-        try {
-          Thread.sleep(3000);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
+            // 2. 尝试让机器人退出频道或群组
+            try {
+              TelegramClientCan.leaveChat(channelId.toString());
+            } catch (Exception leaveException) {
+              log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
+              model.setWarningName("退出群组/频道");
+              model.setContent("机器人退出频道/群组 失败" + channelId + leaveException.getMessage());
+              text = NotificationTemplate.format(model);
+              Telegram.use().sendMessage(chatId, text);
+            }
+            BotChannel botChannel = new BotChannel();
+            botChannel.setChannelId(channelId.toString());
+            botChannel.setDeleted(1);
+            botChannel.update();
+          } else {
+            Integer newMessageId = message.getMessageId();
+            Db.updateBySql("UPDATE bot_channel SET message_id = ? WHERE channel_id = ?", newMessageId, channelId);
+            log.info("{}-{} 发送成功，消息ID：{}", channelId, channelName, newMessageId);
+          }
+        });
+
       }
     }
     log.info("==================进行互推完成==================");
