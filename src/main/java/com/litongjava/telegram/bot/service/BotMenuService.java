@@ -197,7 +197,7 @@ public class BotMenuService {
     List<InlineKeyboardRow> rows = List.of(inlineKeyboardRow1, inlineKeyboardRow2);
     InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(rows);
 
-    TelegramClientCan.execute(EditMessageUtils.html(chatId, messageId, welcomeMessage,inlineKeyboard));
+    TelegramClientCan.execute(EditMessageUtils.html(chatId, messageId, welcomeMessage, inlineKeyboard));
   }
 
   public void car(Update update, String data) {
@@ -260,7 +260,7 @@ public class BotMenuService {
     if (rows.size() == 0) {
       String message = "⚠️您的" + chatTypeString + "未邀请机器人作为管理员，请先邀请机器人 或者 已经在申请中";
       TelegramClientCan.execute(AnswerCallbackUtils.alert(callbackQuery.getId(), message));
-      
+
       return;
     }
 
@@ -357,6 +357,12 @@ public class BotMenuService {
         }
         return;
       }
+    } else {
+      if (chatCount < num) {
+        TelegramClientCan.execute(AnswerCallbackUtils.alert(callbackQuery.getId(), "❌不满足人数要求,申请失败"));
+        log.info("{},{} 不满足人数要求,申请失败", channelId, channelName);
+        return;
+      }
     }
 
     if (status == 1) {
@@ -380,8 +386,13 @@ public class BotMenuService {
 
     InlineKeyboardMarkup replyMarkup = new InlineKeyboardMarkup(buttonRows);
 
-    String approvalMessage = "<b>申请加入车队:</b>\n" + "车队类型：" + chatType + "-" + name + "\n" + "人数要求：" + (num / 1000) + "k+ \n" + "日浏览量：" + ((double) num / 1000) + "k+ \n" + "申请名称：" + channelName + "\n"
-        + "申请链接：" + url + "\n" + "申请人数：" + (chatCount / 1000) + "k\n" + "申请人ID：" + userIdLong + "\n" + "申请人用户名：@" + (username != null ? username : "无");
+    String approvalMessage = "<b>申请加入车队:</b>\n"
+        //
+        + "车队类型：" + chatType + "-" + name + "\n" + "人数要求：" + (num / 1000) + "k+ \n" + "日浏览量：" + ((double) num / 1000) + "k+ \n"
+        //
+        + "申请名称：" + channelName + "\n" + "申请链接：" + url + "\n" + "申请人数：" + (chatCount / 1000) + "k\n"
+        //
+        + "申请人ID：" + userIdLong + "\n" + "申请人用户名：@" + (username != null ? username : "无");
 
     Long adminGroupId = EnvUtils.getLong("bot.admin.group");
 
