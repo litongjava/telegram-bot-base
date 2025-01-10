@@ -36,7 +36,7 @@ public class BotApprovalService {
 
     String approval = split[0];
     String tgId = split[1];
-    String chatType = split[2];
+    //String chatType = split[2];
     String carId = split[3];
     String chatId = split[4];
 
