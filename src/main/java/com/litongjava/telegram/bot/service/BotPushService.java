@@ -138,6 +138,11 @@ public class BotPushService {
         // 删除旧消息
         if (messageIdStr != null && !messageIdStr.isEmpty()) {
           int messageId = Integer.valueOf(messageIdStr);
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
           CompletableFuture<Boolean> future = TelegramClientCan.deleteMessageAsync(channelId, messageId);
           future.whenComplete((deleted, exception) -> {
             if (exception != null) {
@@ -155,6 +160,16 @@ public class BotPushService {
 
         SendMessage html = SendMessageUtils.html(channelId.toString(), ret.toString(), buttons);
         log.info("push to {},{}", channelId, channelName);
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
         CompletableFuture<Message> future = TelegramClientCan.executeAsync(html);
         future.whenComplete((message, exception) -> {
           if (exception != null) {
@@ -168,7 +183,13 @@ public class BotPushService {
 
             // 2. 尝试让机器人退出频道或群组
             try {
+              try {
+                Thread.sleep(1000);
+              } catch (InterruptedException e) {
+                e.printStackTrace();
+              }
               TelegramClientCan.leaveChat(channelId.toString());
+              log.info("机器人退出频道/群组 {} {} 成功：", channelId, channelName);
             } catch (Exception leaveException) {
               log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
               model.setWarningName("退出群组/频道");
