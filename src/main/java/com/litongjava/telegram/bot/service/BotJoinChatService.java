@@ -9,13 +9,14 @@ import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
 
+import com.litongjava.db.OkResult;
 import com.litongjava.db.activerecord.Db;
 import com.litongjava.db.activerecord.Row;
 import com.litongjava.telegram.can.TelegramClientCan;
-import com.litongjava.telegram.fetcher.TelegramChatInfoFetcher;
+import com.litongjava.telegram.fetcher.TelegramPeerInfoFetcher;
 import com.litongjava.telegram.utils.SendMessageUtils;
 import com.litongjava.telegram.utils.TelegramBotUtils;
-import com.litongjava.telegram.vo.TelegramChatInfo;
+import com.litongjava.telegram.vo.TelegramPeerInfo;
 import com.litongjava.tio.utils.json.JacksonUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -107,8 +108,12 @@ public class BotJoinChatService {
     }
 
     // 获取频道成员数量（通过外部工具类TelegramUrlFetcher）
-    TelegramChatInfo telegramChatInfo = TelegramChatInfoFetcher.getChatUrl(chatUrl);
-    int count = (telegramChatInfo != null) ? telegramChatInfo.getChatCount() : 0;
+    OkResult<TelegramPeerInfo> okResult = TelegramPeerInfoFetcher.getChatUrl(chatUrl);
+    if(!okResult.isOk()) {
+      return;
+    }
+    TelegramPeerInfo telegramPeerInfo = okResult.getV();
+    int count = (telegramPeerInfo != null) ? telegramPeerInfo.getCount() : 0;
 
     // 数据库操作 保存或者更新bot_channel表
     String sql = "SELECT channel_id FROM bot_channel WHERE channel_id = ?";

@@ -17,16 +17,17 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import com.jfinal.kit.Kv;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
+import com.litongjava.db.OkResult;
 import com.litongjava.db.SqlPara;
 import com.litongjava.db.activerecord.Db;
 import com.litongjava.db.activerecord.Row;
 import com.litongjava.model.page.Page;
 import com.litongjava.telegram.can.TelegramClientCan;
-import com.litongjava.telegram.fetcher.TelegramChatInfoFetcher;
+import com.litongjava.telegram.fetcher.TelegramPeerInfoFetcher;
 import com.litongjava.telegram.utils.AnswerCallbackUtils;
 import com.litongjava.telegram.utils.EditMessageUtils;
 import com.litongjava.telegram.utils.TelegramBotUtils;
-import com.litongjava.telegram.vo.TelegramChatInfo;
+import com.litongjava.telegram.vo.TelegramPeerInfo;
 import com.litongjava.template.SqlTemplates;
 import com.litongjava.tio.utils.environment.EnvUtils;
 
@@ -346,8 +347,13 @@ public class BotMenuService {
     String url = channelRow.getStr("url");
     int status = channelRow.getInt("status");
 
-    TelegramChatInfo chatInfo = TelegramChatInfoFetcher.getChatUrl(url);
-    int chatCount = chatInfo.getChatCount();
+    OkResult<TelegramPeerInfo> okResult = TelegramPeerInfoFetcher.getChatUrl(url);
+    if(!okResult.isOk()) {
+      return;
+    }
+    TelegramPeerInfo peerInfo = okResult.getV();
+    
+    int chatCount = peerInfo.getCount();
 
     if (EnvUtils.isDev()) {
       if (!channelId.equals(-1002446428074L)) {
