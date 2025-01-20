@@ -20,6 +20,9 @@ import com.litongjava.telegram.utils.SendMessageUtils;
 import com.litongjava.telegram.utils.TelegramBotUtils;
 import com.litongjava.tio.utils.environment.EnvUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class PushBotStartCommandFunction {
 
   public void index(Update update) {
@@ -27,6 +30,7 @@ public class PushBotStartCommandFunction {
     Integer messageId = message.getMessageId();
 
     Chat chat = message.getChat();
+    log.info("start:{}", chat.getUserName());
     String type = chat.getType();
     if (!type.equals(ChatType.chat_private)) {
       return;
@@ -42,7 +46,6 @@ public class PushBotStartCommandFunction {
 
     List<InlineKeyboardRow> rows = List.of(inlineKeyboardRow1, inlineKeyboardRow2);
     ReplyKeyboard inlineKeyboard = new InlineKeyboardMarkup(rows);
-
 
     Long chatId = chat.getId();
     String fromFirstName = chat.getFirstName();
