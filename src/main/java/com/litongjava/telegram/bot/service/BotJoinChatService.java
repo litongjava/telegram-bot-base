@@ -109,7 +109,7 @@ public class BotJoinChatService {
 
     // 获取频道成员数量（通过外部工具类TelegramUrlFetcher）
     OkResult<TelegramPeerInfo> okResult = TelegramPeerInfoFetcher.getChatUrl(chatUrl);
-    if(!okResult.isOk()) {
+    if (!okResult.isOk()) {
       return;
     }
     TelegramPeerInfo telegramPeerInfo = okResult.getV();
@@ -132,7 +132,7 @@ public class BotJoinChatService {
         Db.update("bot_channel", "channel_id", saveRow);
       }
     } catch (Exception e) {
-      // 保存数据失败
+      log.error(e.getMessage(), e);
       sendMessageToUser(userIdLong, "保存数据失败");
       return;
     }
