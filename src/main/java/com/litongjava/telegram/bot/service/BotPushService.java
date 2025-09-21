@@ -1,8 +1,8 @@
 package com.litongjava.telegram.bot.service;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
@@ -27,7 +27,6 @@ import com.litongjava.telegram.utils.TextFilerUtils;
 import com.litongjava.tio.utils.environment.EnvUtils;
 import com.litongjava.tio.utils.network.IpUtils;
 import com.litongjava.tio.utils.notification.NotifactionWarmModel;
-import com.litongjava.tio.utils.notification.NotificationTemplate;
 import com.litongjava.tio.utils.telegram.Telegram;
 
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +54,7 @@ public class BotPushService {
     model.setAppName(EnvUtils.getStr("bot.name"));
     model.setDeviceName(IpUtils.getLocalIp());
     model.setLevel("II");
-    model.setTime(new Date());
+    model.setTime(ZonedDateTime.now());
 
     // 获取车队信息
     String sql = "SELECT id, name FROM convoy WHERE join_count > 1";
@@ -178,7 +177,7 @@ public class BotPushService {
             String table = MarkdownTableUtils.toItems(channel);
             model.setContent("推送消息失败:" + exception.getMessage() + "\n" + table);
             model.setWarningName("推送消息失败");
-            String text = NotificationTemplate.format(model);
+            String text = model.format();
             Telegram.use().sendMessage(chatId, text);
 
             // 2. 尝试让机器人退出频道或群组
@@ -194,7 +193,7 @@ public class BotPushService {
               log.error("机器人退出频道/群组 {} 失败：{}", channelId, leaveException.getMessage());
               model.setWarningName("退出群组/频道");
               model.setContent("机器人退出频道/群组 失败" + channelId + leaveException.getMessage());
-              text = NotificationTemplate.format(model);
+              text = model.format();
               Telegram.use().sendMessage(chatId, text);
             }
             BotChannel botChannel = new BotChannel();

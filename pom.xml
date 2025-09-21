@@ -8,15 +8,26 @@
     <java.version>17</java.version>
     <maven.compiler.source>${java.version}</maven.compiler.source>
     <maven.compiler.target>${java.version}</maven.compiler.target>
-    <java-db.version>1.5.1</java-db.version>
-    <jfinal-aop.version>1.3.6</jfinal-aop.version>
+    <java-db.version>1.5.4</java-db.version>
+    <jfinal-aop.version>1.3.7</jfinal-aop.version>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>com.litongjava</groupId>
+      <artifactId>telegram-bot-utils</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.litongjava</groupId>
       <artifactId>java-db</artifactId>
       <version>${java-db.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.litongjava</groupId>
+      <artifactId>jfinal-aop</artifactId>
+      <version>${jfinal-aop.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -24,11 +35,7 @@
       <version>1.18.30</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
-      <groupId>com.litongjava</groupId>
-      <artifactId>telegram-bot-utils</artifactId>
-      <version>1.0.0</version>
-    </dependency>
+
     <dependency>
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz</artifactId>
@@ -38,11 +45,6 @@
       <groupId>org.quartz-scheduler</groupId>
       <artifactId>quartz-jobs</artifactId>
       <version>2.3.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.litongjava</groupId>
-      <artifactId>jfinal-aop</artifactId>
-      <version>${jfinal-aop.version}</version>
     </dependency>
   </dependencies>
 </project>
