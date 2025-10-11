@@ -17,11 +17,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import com.jfinal.kit.Kv;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
-import com.litongjava.db.OkResult;
 import com.litongjava.db.SqlPara;
 import com.litongjava.db.activerecord.Db;
 import com.litongjava.db.activerecord.Row;
 import com.litongjava.model.page.Page;
+import com.litongjava.result.OkResult;
 import com.litongjava.telegram.can.TelegramClientCan;
 import com.litongjava.telegram.fetcher.TelegramPeerInfoFetcher;
 import com.litongjava.telegram.utils.AnswerCallbackUtils;

@@ -9,9 +9,9 @@ import org.telegram.telegrambots.meta.api.objects.chat.Chat;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMemberUpdated;
 
-import com.litongjava.db.OkResult;
 import com.litongjava.db.activerecord.Db;
 import com.litongjava.db.activerecord.Row;
+import com.litongjava.result.OkResult;
 import com.litongjava.telegram.can.TelegramClientCan;
 import com.litongjava.telegram.fetcher.TelegramPeerInfoFetcher;
 import com.litongjava.telegram.utils.SendMessageUtils;
